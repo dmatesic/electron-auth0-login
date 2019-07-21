@@ -94,7 +94,7 @@ In main process code:
 import auth from './auth'; // module defined above
 
 async function doSomethingWithAPI() {
-    const token = await auth.getToken();
+    const token = await auth.getToken().access_token;
     api.get('/things', {
         headers: {
             'Authorization': 'Bearer ' + token
@@ -111,7 +111,7 @@ import {remote} from 'electron';
 const auth = remote.require('./auth');
 
 async function doSomethingWithAPI() {
-    const token = await auth.getToken();
+    const token = await auth.getToken().access_token;
     api.get('/things', {
         headers: {
             'Authorization': 'Bearer ' + token
