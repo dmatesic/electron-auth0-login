@@ -138,9 +138,11 @@ export default class ElectronAuth0Login {
 
   private async login() {
     const pkcePair = getPKCEChallengePair();
-    const authCode = await this.getAuthCode(pkcePair);
+    const { authCode, authWindow } = await this.getAuthCode(pkcePair);
 
     this.tokenProperties = await this.exchangeAuthCodeForToken(authCode, pkcePair);
+
+    authWindow.destroy();
 
     if (this.useRefreshToken && this.tokenProperties.refresh_token) {
       keytar.setPassword(this.config.applicationName, 'refresh-token', this.tokenProperties.refresh_token);
@@ -177,8 +179,8 @@ export default class ElectronAuth0Login {
     return this.tokenProperties;
   }
 
-  private async getAuthCode(pkcePair: PKCEPair): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+  private async getAuthCode(pkcePair: PKCEPair): Promise<AuthCodeResponse> {
+    return new Promise<AuthCodeResponse>((resolve, reject) => {
       const authCodeUrl =
         `https://${this.config.auth0Domain}/authorize?` +
         qs.stringify({
@@ -204,8 +206,7 @@ export default class ElectronAuth0Login {
         const location = url.parse(href);
         if (location.pathname == '/mobile') {
           const query = qs.parse(location.search || '', { ignoreQueryPrefix: true });
-          resolve(query.code);
-          authWindow.destroy();
+          resolve({ authCode: query.code, authWindow });
         }
       });
 
