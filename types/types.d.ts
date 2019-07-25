@@ -1,31 +1,40 @@
 interface Config {
-    applicationName?: string,
+  applicationName?: string;
 
-    // API we're going to access
-    auth0Audience: string,
+  // API we're going to access
+  auth0Audience: string;
 
-    auth0ClientId: string,
-    auth0Domain: string,
+  auth0ClientId: string;
+  auth0Domain: string;
 
-    // What permissions do we want?
-    auth0Scopes: string,
+  // What permissions do we want?
+  auth0Scopes: string;
 
-    useRefreshTokens?: boolean
+  useRefreshTokens?: boolean;
 }
 
 interface PKCEPair {
-    verifier: string,
-    challenge: string
+  verifier: string;
+  challenge: string;
 }
 
 interface Auth0TokenResponse {
-    access_token: string,
-    expires_in: number
-    scope: string,
-    refresh_token?: string
-    token_type: string
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  refresh_token?: string;
+  token_type: string;
 }
 
 interface TokenProperties extends Auth0TokenResponse {
-    created_time: number
+  created_time: number;
+}
+
+interface BrowserWindow {
+  destroy(): void;
+}
+
+interface AuthCodeResponse {
+  authCode: string;
+  authWindow: BrowserWindow;
 }

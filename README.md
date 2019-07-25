@@ -122,7 +122,7 @@ async function doSomethingWithAPI() {
 
 There is also a basic end to end example in the `examples` folder that will open the auth window and upon sucessfull login, log the user profile to console and open an empty Electron window.
 
-To run: `clientId=CLIENT_ID domain=DOMAIN audience=AUDIENCE npm run example:basic`
+To run: `npm run dist && clientId=CLIENT_ID domain=DOMAIN audience=AUDIENCE npm run example:basic`
 
 ## Credits
 

@@ -86,8 +86,9 @@ class ElectronAuth0Login {
     login() {
         return __awaiter(this, void 0, void 0, function* () {
             const pkcePair = cryptoUtils_1.getPKCEChallengePair();
-            const authCode = yield this.getAuthCode(pkcePair);
+            const { authCode, authWindow } = yield this.getAuthCode(pkcePair);
             this.tokenProperties = yield this.exchangeAuthCodeForToken(authCode, pkcePair);
+            authWindow.destroy();
             if (this.useRefreshToken && this.tokenProperties.refresh_token) {
                 keytar.setPassword(this.config.applicationName, 'refresh-token', this.tokenProperties.refresh_token);
             }
@@ -118,8 +119,7 @@ class ElectronAuth0Login {
                     const location = url_1.default.parse(href);
                     if (location.pathname == '/mobile') {
                         const query = qs_1.default.parse(location.search || '', { ignoreQueryPrefix: true });
-                        resolve(query.code);
-                        authWindow.destroy();
+                        resolve({ authCode: query.code, authWindow });
                     }
                 });
                 authWindow.on('close', reject);
