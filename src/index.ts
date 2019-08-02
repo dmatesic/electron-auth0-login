@@ -51,12 +51,17 @@ export default class ElectronAuth0Login {
   private config: Config;
   private tokenProperties: TokenProperties | null;
   private useRefreshToken: boolean;
+<<<<<<< HEAD
 >>>>>>> Return all token properties in getToken()
+=======
+  private webPreferences: object;
+>>>>>>> Allow configuration of webPreferences
 
   constructor(config: Config) {
     this.config = config;
     this.tokenProperties = null;
     this.useRefreshToken = !!(config.useRefreshTokens && config.applicationName && keytar);
+    this.webPreferences = this.config.webPreferences || {};
 
 <<<<<<< HEAD
         if (config.windowConfig) {
@@ -202,7 +207,8 @@ export default class ElectronAuth0Login {
         height: 600,
         alwaysOnTop: true,
         title: 'Log in',
-        backgroundColor: '#202020'
+        backgroundColor: '#202020',
+        webPreferences: this.webPreferences
       });
 
       authWindow.webContents.on('did-navigate' as any, (event: any, href: string) => {

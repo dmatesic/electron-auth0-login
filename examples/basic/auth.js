@@ -13,7 +13,10 @@ const electronAuth0Login = new ElectronAuth0Login({
   auth0Audience: audience,
   auth0ClientId: clientId,
   auth0Domain: domain,
-  auth0Scopes: scope
+  auth0Scopes: scope,
+  webPreferences: {
+    partition: 'in-mem'
+  }
 });
 
 function handleAuth() {
