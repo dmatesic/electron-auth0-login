@@ -11,6 +11,8 @@ interface Config {
   auth0Scopes: string;
 
   useRefreshTokens?: boolean;
+
+  webPreferences?: object;
 }
 
 interface PKCEPair {

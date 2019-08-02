@@ -25,6 +25,7 @@ class ElectronAuth0Login {
         this.config = config;
         this.tokenProperties = null;
         this.useRefreshToken = !!(config.useRefreshTokens && config.applicationName && keytar);
+        this.webPreferences = this.config.webPreferences || {};
         if (config.useRefreshTokens && !config.applicationName) {
             console.warn('electron-auth0-login: cannot use refresh tokens without an application name');
         }
@@ -116,7 +117,8 @@ class ElectronAuth0Login {
                     height: 600,
                     alwaysOnTop: true,
                     title: 'Log in',
-                    backgroundColor: '#202020'
+                    backgroundColor: '#202020',
+                    webPreferences: this.webPreferences
                 });
                 authWindow.webContents.on('did-navigate', (event, href) => {
                     const location = url_1.default.parse(href);
