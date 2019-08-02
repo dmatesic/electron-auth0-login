@@ -11,6 +11,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const os_1 = __importDefault(require("os"));
 const codependency_1 = __importDefault(require("codependency"));
 const electron_1 = require("electron");
 const qs_1 = __importDefault(require("qs"));
@@ -85,10 +86,11 @@ class ElectronAuth0Login {
     }
     login() {
         return __awaiter(this, void 0, void 0, function* () {
+            const authWindowDestroyTimeout = os_1.default.platform() === 'win32' ? 1000 : 0;
             const pkcePair = cryptoUtils_1.getPKCEChallengePair();
             const { authCode, authWindow } = yield this.getAuthCode(pkcePair);
             this.tokenProperties = yield this.exchangeAuthCodeForToken(authCode, pkcePair);
-            authWindow.destroy();
+            setTimeout(() => authWindow.destroy(), authWindowDestroyTimeout);
             if (this.useRefreshToken && this.tokenProperties.refresh_token) {
                 keytar.setPassword(this.config.applicationName, 'refresh-token', this.tokenProperties.refresh_token);
             }
@@ -97,6 +99,7 @@ class ElectronAuth0Login {
     }
     getAuthCode(pkcePair) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(os_1.default.platform());
             return new Promise((resolve, reject) => {
                 const authCodeUrl = `https://${this.config.auth0Domain}/authorize?` +
                     qs_1.default.stringify({
