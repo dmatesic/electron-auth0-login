@@ -1,3 +1,4 @@
+import os from 'os';
 import codependency from 'codependency';
 import { BrowserWindow } from 'electron';
 import qs from 'qs';
@@ -137,12 +138,13 @@ export default class ElectronAuth0Login {
   }
 
   private async login() {
+    const authWindowDestroyTimeout = os.platform() === 'win32' ? 1000 : 0;
     const pkcePair = getPKCEChallengePair();
     const { authCode, authWindow } = await this.getAuthCode(pkcePair);
 
     this.tokenProperties = await this.exchangeAuthCodeForToken(authCode, pkcePair);
 
-    authWindow.destroy();
+    setTimeout(() => authWindow.destroy(), authWindowDestroyTimeout);
 
     if (this.useRefreshToken && this.tokenProperties.refresh_token) {
       keytar.setPassword(this.config.applicationName, 'refresh-token', this.tokenProperties.refresh_token);
@@ -180,6 +182,7 @@ export default class ElectronAuth0Login {
   }
 
   private async getAuthCode(pkcePair: PKCEPair): Promise<AuthCodeResponse> {
+    console.log(os.platform());
     return new Promise<AuthCodeResponse>((resolve, reject) => {
       const authCodeUrl =
         `https://${this.config.auth0Domain}/authorize?` +
