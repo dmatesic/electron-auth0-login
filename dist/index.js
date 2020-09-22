@@ -12,6 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const os_1 = __importDefault(require("os"));
+const { readFileSync } = require('fs');
+const yaml = require('js-yaml');
+const { join } = require('path');
 const codependency_1 = __importDefault(require("codependency"));
 const electron_1 = require("electron");
 const qs_1 = __importDefault(require("qs"));
@@ -129,11 +132,7 @@ class ElectronAuth0Login {
                 });
                 authWindow.on('close', reject);
                 // TODO: Grab proxy settings from local file
-                authWindow.webContents.session.setProxy({
-                    proxyRules: '',
-                    pacScript: '',
-                    proxyBypassRules: '',
-                }).then(() => {
+                loadProxy(authWindow).then(() => {
                     authWindow.loadURL(authCodeUrl).catch(handleError);
                 });
             });
@@ -182,4 +181,35 @@ function handleError(err) {
         electron_1.dialog.showErrorBox('Error with login', message);
         electron_1.app.quit();
     }
+}
+function loadProxy(win) {
+    let proxyRules = '';
+    let pacScript = '';
+    let proxyBypassRules = '';
+    const appData = electron_1.app.getPath('appData');
+    const proxyConfigLocation = join(appData, 'Cquence', 'proxy.yaml');
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const proxyConfig = readFileSync(proxyConfigLocation, 'utf8');
+            yaml.safeLoadAll(proxyConfig, (doc) => {
+                ({ proxyRules, pacScript, proxyBypassRules } = doc);
+            });
+        }
+        catch (err) {
+            // NOTE: proxy config file is optional
+            // If it does not exist we use the default values
+            console.error(`Unable to load proxy file at: ${proxyConfigLocation}`);
+        }
+        console.log('load proxy with params: ', {
+            proxyRules,
+            pacScript,
+            proxyBypassRules,
+        });
+        yield win.webContents.session.setProxy({
+            proxyRules,
+            pacScript,
+            proxyBypassRules,
+        });
+        resolve();
+    }));
 }

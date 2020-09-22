@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "codependency": "2.1.0",
+    "js-yaml": "^3.14.0",
     "qs": "6.5.2"
   },
   "peerDependencies": {

@@ -1,4 +1,7 @@
 import os from 'os';
+const { readFileSync } = require('fs');
+const yaml = require('js-yaml');
+const { join } = require('path');
 import codependency from 'codependency';
 import { app, dialog, BrowserWindow } from 'electron';
 import qs from 'qs';
@@ -128,11 +131,7 @@ export default class ElectronAuth0Login {
       authWindow.on('close', reject);
 
       // TODO: Grab proxy settings from local file
-      authWindow.webContents.session.setProxy({
-        proxyRules: '',
-        pacScript: '',
-        proxyBypassRules: '',
-      }).then(() => {
+      loadProxy(authWindow).then(() => {
         authWindow.loadURL(authCodeUrl).catch(handleError);
       });
     });
@@ -187,4 +186,40 @@ function handleError(err: any) {
     dialog.showErrorBox('Error with login', message);
     app.quit();
   }
+}
+
+function loadProxy(win: any) {
+  let proxyRules = '';
+  let pacScript = '';
+  let proxyBypassRules = '';
+  const appData = app.getPath('appData');
+  const proxyConfigLocation = join(appData, 'Cquence', 'proxy.yaml');
+
+  return new Promise(async resolve => {
+    try {
+      const proxyConfig = readFileSync(proxyConfigLocation, 'utf8');
+
+      yaml.safeLoadAll(proxyConfig, (doc: any) => {
+        ({ proxyRules, pacScript, proxyBypassRules } = doc);
+      });
+    } catch (err) {
+      // NOTE: proxy config file is optional
+      // If it does not exist we use the default values
+      console.error(`Unable to load proxy file at: ${proxyConfigLocation}`);
+    }
+
+    console.log('load proxy with params: ', {
+      proxyRules,
+      pacScript,
+      proxyBypassRules,
+    });
+
+    await win.webContents.session.setProxy({
+      proxyRules,
+      pacScript,
+      proxyBypassRules,
+    });
+
+    resolve();
+  });
 }
