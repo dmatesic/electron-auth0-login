@@ -133,7 +133,7 @@ class ElectronAuth0Login {
                     proxyRules: '',
                     pacScript: '',
                     proxyBypassRules: '',
-                }, () => {
+                }).then(() => {
                     authWindow.loadURL(authCodeUrl).catch(handleError);
                 });
             });
@@ -172,14 +172,14 @@ function handleError(err) {
     console.error(err);
     switch (err.code) {
         case 'ERR_TUNNEL_CONNECTION_FAILED':
-            showErrorMessageBox('Proxy error');
+        case 'ERR_PROXY_CONNECTION_FAILED':
+            showErrorBox('Proxy error');
             break;
         default:
-            showErrorMessageBox();
+            showErrorBox();
     }
-    function showErrorMessageBox(message = 'Unknown') {
-        electron_1.dialog.showMessageBox({ type: 'error', message: `Error with login: ${message}` }, () => {
-            electron_1.app.quit();
-        });
+    function showErrorBox(message = 'Unknown') {
+        electron_1.dialog.showErrorBox('Error with login', message);
+        electron_1.app.quit();
     }
 }

@@ -28,7 +28,7 @@
     "@types/request": "2.47.1",
     "@types/request-promise-native": "1.0.15",
     "auth0": "^2.18.0",
-    "electron": "^5.0.6",
+    "electron": "^7.1.2",
     "electron-rebuild": "^1.8.5",
     "keytar": "^6.0.1",
     "request": "^2.88.0",
@@ -40,7 +40,7 @@
     "qs": "6.5.2"
   },
   "peerDependencies": {
-    "electron": "5.0.6",
+    "electron": "^7.1.2",
     "request": "2.88.0",
     "request-promise-native": "1.0.5"
   },
