@@ -1,6 +1,6 @@
 import os from 'os';
 import codependency from 'codependency';
-import { BrowserWindow } from 'electron';
+import { app, dialog, BrowserWindow } from 'electron';
 import qs from 'qs';
 import request from 'request-promise-native';
 import url from 'url';
@@ -74,6 +74,7 @@ export default class ElectronAuth0Login {
       }
     })
       .promise()
+      .catch(handleError)
       .then(toTokenMeta);
   }
 
@@ -94,7 +95,6 @@ export default class ElectronAuth0Login {
   }
 
   private async getAuthCode(pkcePair: PKCEPair): Promise<AuthCodeResponse> {
-    console.log(os.platform());
     return new Promise<AuthCodeResponse>((resolve, reject) => {
       const authCodeUrl =
         `https://${this.config.auth0Domain}/authorize?` +
@@ -127,7 +127,14 @@ export default class ElectronAuth0Login {
 
       authWindow.on('close', reject);
 
-      authWindow.loadURL(authCodeUrl);
+      // TODO: Grab proxy settings from local file
+      authWindow.webContents.session.setProxy({
+        proxyRules: '',
+        pacScript: '',
+        proxyBypassRules: '',
+      }, () => {
+        authWindow.loadURL(authCodeUrl).catch(handleError);
+      });
     });
   }
 
@@ -144,6 +151,7 @@ export default class ElectronAuth0Login {
       }
     })
       .promise()
+      .catch(handleError)
       .then(toTokenMeta);
   }
 }
@@ -161,4 +169,22 @@ function toTokenMeta(tokenResponse: Auth0TokenResponse): TokenProperties {
 
 function getEpochSeconds() {
   return Date.now() / 1000;
+}
+
+function handleError(err: any) {
+  console.error(err);
+
+  switch (err.code) {
+    case 'ERR_TUNNEL_CONNECTION_FAILED':
+      showErrorMessageBox('Proxy error');
+      break;
+    default:
+      showErrorMessageBox();
+  }
+
+  function showErrorMessageBox(message: string = 'Unknown') {
+    dialog.showMessageBox({ type: 'error', message: `Error with login: ${message}` }, () => {
+      app.quit();
+    });
+  }
 }

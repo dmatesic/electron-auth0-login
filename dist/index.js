@@ -82,6 +82,7 @@ class ElectronAuth0Login {
                 }
             })
                 .promise()
+                .catch(handleError)
                 .then(toTokenMeta);
         });
     }
@@ -100,7 +101,6 @@ class ElectronAuth0Login {
     }
     getAuthCode(pkcePair) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(os_1.default.platform());
             return new Promise((resolve, reject) => {
                 const authCodeUrl = `https://${this.config.auth0Domain}/authorize?` +
                     qs_1.default.stringify({
@@ -128,7 +128,14 @@ class ElectronAuth0Login {
                     }
                 });
                 authWindow.on('close', reject);
-                authWindow.loadURL(authCodeUrl);
+                // TODO: Grab proxy settings from local file
+                authWindow.webContents.session.setProxy({
+                    proxyRules: '',
+                    pacScript: '',
+                    proxyBypassRules: '',
+                }, () => {
+                    authWindow.loadURL(authCodeUrl).catch(handleError);
+                });
             });
         });
     }
@@ -146,6 +153,7 @@ class ElectronAuth0Login {
                 }
             })
                 .promise()
+                .catch(handleError)
                 .then(toTokenMeta);
         });
     }
@@ -159,4 +167,19 @@ function toTokenMeta(tokenResponse) {
 }
 function getEpochSeconds() {
     return Date.now() / 1000;
+}
+function handleError(err) {
+    console.error(err);
+    switch (err.code) {
+        case 'ERR_TUNNEL_CONNECTION_FAILED':
+            showErrorMessageBox('Proxy error');
+            break;
+        default:
+            showErrorMessageBox();
+    }
+    function showErrorMessageBox(message = 'Unknown') {
+        electron_1.dialog.showMessageBox({ type: 'error', message: `Error with login: ${message}` }, () => {
+            electron_1.app.quit();
+        });
+    }
 }
