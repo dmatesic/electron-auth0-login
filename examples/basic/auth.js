@@ -14,9 +14,7 @@ const electronAuth0Login = new ElectronAuth0Login({
   auth0ClientId: clientId,
   auth0Domain: domain,
   auth0Scopes: scope,
-  webPreferences: {
-    partition: 'in-mem'
-  }
+  forceLogin: true,
 });
 
 function handleAuth() {

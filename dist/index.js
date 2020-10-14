@@ -28,7 +28,7 @@ class ElectronAuth0Login {
         this.config = config;
         this.tokenProperties = null;
         this.useRefreshToken = !!(config.useRefreshTokens && config.applicationName && keytar);
-        this.webPreferences = this.config.webPreferences || {};
+        this.forceLogin = this.config.forceLogin || false;
         if (config.useRefreshTokens && !config.applicationName) {
             console.warn('electron-auth0-login: cannot use refresh tokens without an application name');
         }
@@ -104,7 +104,7 @@ class ElectronAuth0Login {
     }
     getAuthCode(pkcePair) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 const authCodeUrl = `https://${this.config.auth0Domain}/authorize?` +
                     qs_1.default.stringify({
                         audience: this.config.auth0Audience,
@@ -121,8 +121,9 @@ class ElectronAuth0Login {
                     alwaysOnTop: true,
                     title: 'Log in',
                     backgroundColor: '#202020',
-                    webPreferences: this.webPreferences
                 });
+                if (this.forceLogin)
+                    yield authWindow.webContents.session.clearStorageData();
                 authWindow.webContents.on('did-navigate', (event, href) => {
                     const location = url_1.default.parse(href);
                     if (location.pathname == '/mobile') {
@@ -135,7 +136,7 @@ class ElectronAuth0Login {
                 loadProxy(authWindow).then(() => {
                     authWindow.loadURL(authCodeUrl).catch(handleError);
                 });
-            });
+            }));
         });
     }
     exchangeAuthCodeForToken(authCode, pkcePair) {

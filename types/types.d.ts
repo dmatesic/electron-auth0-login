@@ -12,7 +12,7 @@ interface Config {
 
   useRefreshTokens?: boolean;
 
-  webPreferences?: object;
+  forceLogin?: boolean;
 }
 
 interface PKCEPair {

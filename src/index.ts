@@ -17,13 +17,13 @@ export default class ElectronAuth0Login {
   private config: Config;
   private tokenProperties: TokenProperties | null;
   private useRefreshToken: boolean;
-  private webPreferences: object;
+  private forceLogin: boolean;
 
   constructor(config: Config) {
     this.config = config;
     this.tokenProperties = null;
     this.useRefreshToken = !!(config.useRefreshTokens && config.applicationName && keytar);
-    this.webPreferences = this.config.webPreferences || {};
+    this.forceLogin = this.config.forceLogin || false;
 
     if (config.useRefreshTokens && !config.applicationName) {
       console.warn('electron-auth0-login: cannot use refresh tokens without an application name');
@@ -98,7 +98,7 @@ export default class ElectronAuth0Login {
   }
 
   private async getAuthCode(pkcePair: PKCEPair): Promise<AuthCodeResponse> {
-    return new Promise<AuthCodeResponse>((resolve, reject) => {
+    return new Promise<AuthCodeResponse>(async (resolve, reject) => {
       const authCodeUrl =
         `https://${this.config.auth0Domain}/authorize?` +
         qs.stringify({
@@ -117,8 +117,9 @@ export default class ElectronAuth0Login {
         alwaysOnTop: true,
         title: 'Log in',
         backgroundColor: '#202020',
-        webPreferences: this.webPreferences
       });
+
+      if (this.forceLogin) await authWindow.webContents.session.clearStorageData();
 
       authWindow.webContents.on('did-navigate' as any, (event: any, href: string) => {
         const location = url.parse(href);
